@@ -3,25 +3,25 @@
     <div class="keypad-container">
       <template v-for="n in 12">
         <div :key="n" class="keypad-flex keypad-class">
-          <div v-if="n == 10 && onReset" class="keypad" @click="onReset">
-            <div class="keypad-center">
-              <strong class="keypad-delete">❌</strong>
-            </div>
-          </div>
-          <div
+          <button v-if="n == 10 && onReset" class="keypad" @click="onReset">
+            <div class="keypad-bigger">❌</div>
+          </button>
+          <button
             v-if="n != 10 && n != 12"
             class="keypad"
             :ripple="true"
             @click="onInput(n)"
           >
-            <div v-if="n < 10" class="keypad-center">{{ n }}</div>
-            <div v-if="n == 11" class="keypad-center">0</div>
-          </div>
-          <div v-if="n == 12 && onSubmit" class="keypad" @click="onSubmit(n)">
-            <div v-if="n == 12" class="keypad-center">
-              <strong class="keypad-delete">✔️</strong>
-            </div>
-          </div>
+            <div v-if="n < 10">{{ n }}</div>
+            <div v-if="n == 11">0</div>
+          </button>
+          <button
+            v-if="n == 12 && onSubmit"
+            class="keypad"
+            @click="onSubmit(n)"
+          >
+            <div class="keypad-bigger">✔️</div>
+          </button>
         </div>
       </template>
     </div>
@@ -110,22 +110,30 @@ export default {
 
 .keypad {
   width: 100%;
-  height: 100%;
+  height: 115%;
   text-align: center;
   vertical-align: center;
-  margin: 0 auto;
-}
-
-.keypad-center {
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
   font-size: 1.3rem;
+  background-color: #fafafa;
+  border: none;
 }
 
-.keypad-delete {
+button.keypad:focus {
+  outline: 0;
+}
+
+button.keypad:active {
+  background-color: #ccc;
+}
+
+button.keypad div {
+  line-height: 60px;
+}
+
+.keypad-bigger {
   font-size: 1.5rem;
 }
+
 .slideInUp {
   -webkit-animation-name: slideInUp;
   animation-name: slideInUp;
