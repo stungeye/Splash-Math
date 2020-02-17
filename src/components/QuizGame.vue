@@ -4,13 +4,13 @@
       <div>
         <div class="question">
           <div class="operand">
-            {{ question.first_operand }}
+            {{ question.firstOperand }}
           </div>
           <div class="operator">
             {{ operator }}
           </div>
           <div class="operand">
-            {{ question.second_operand }}
+            {{ question.secondOperand }}
           </div>
         </div>
         <div class="answer">
@@ -41,11 +41,11 @@
 import keypad from "@/components/KeyPad.vue";
 import { Howl } from "howler";
 
-function generate_questions(level) {
+function generateQuestions(level) {
   let questions = [];
   for (let i = 1; i <= level; i++) {
     for (let j = i; j <= level; j++) {
-      questions.push({ first_operand: i, second_operand: j, correct: false });
+      questions.push({ firstOperand: i, secondOperand: j, correct: false });
     }
   }
   return questions;
@@ -78,13 +78,13 @@ export default {
       if (this.questionNumber != null) {
         return this.unfinishedQuestions[this.questionNumber];
       }
-      return { first_operand: "?", second_operand: "?" };
+      return { firstOperand: "?", secondOperand: "?" };
     },
     unfinishedQuestions: function() {
       return this.questions.filter(question => !question.correct);
     },
     computedAnswer: function() {
-      return this.question.first_operand + this.question.second_operand;
+      return this.question.firstOperand + this.question.secondOperand;
     }
   },
 
@@ -110,7 +110,7 @@ export default {
 
   methods: {
     levelUp() {
-      this.questions = generate_questions(this.level);
+      this.questions = generateQuestions(this.level);
       this.nextQuestion();
     },
     nextQuestion() {
@@ -138,7 +138,7 @@ export default {
     onSubmit() {
       if (
         this.userAnswer ==
-        this.question.first_operand + this.question.second_operand
+        this.question.firstOperand + this.question.secondOperand
       ) {
         this.correctSound.play();
 
