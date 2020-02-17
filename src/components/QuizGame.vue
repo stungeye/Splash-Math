@@ -43,11 +43,17 @@ import { Howl } from "howler";
 
 function generateQuestions(level) {
   let questions = [];
+
   for (let i = 1; i <= level; i++) {
     for (let j = i; j <= level; j++) {
-      questions.push({ firstOperand: i, secondOperand: j, correct: false });
+      if (Math.random() < 0.5) {
+        questions.push({ firstOperand: i, secondOperand: j, correct: false });
+      } else {
+        questions.push({ firstOperand: j, secondOperand: i, correct: false });
+      }
     }
   }
+
   return questions;
 }
 
