@@ -1,4 +1,8 @@
-# math-fun
+# Splash Math - Basic Math Flash Card Game.
+
+![img](https://raw.githubusercontent.com/stungeye/Splash-Math/master/public/math-ui.png)
+
+Built using [Vue.js](https://vuejs.org).
 
 ## Project setup
 ```
@@ -14,11 +18,3 @@ yarn serve
 ```
 yarn build
 ```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
