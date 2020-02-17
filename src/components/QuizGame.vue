@@ -84,11 +84,13 @@ export default {
       if (this.questionNumber != null) {
         return this.unfinishedQuestions[this.questionNumber];
       }
-      return { firstOperand: "?", secondOperand: "?" };
+      return { firstOperand: 0, secondOperand: 0, correct: false };
     },
+
     unfinishedQuestions: function() {
       return this.questions.filter(question => !question.correct);
     },
+
     computedAnswer: function() {
       return this.question.firstOperand + this.question.secondOperand;
     }
@@ -119,6 +121,7 @@ export default {
       this.questions = generateQuestions(this.level);
       this.nextQuestion();
     },
+
     nextQuestion() {
       this.userAnswer = null;
       const doneLevel = this.questions.every(
@@ -133,6 +136,7 @@ export default {
         this.levelUp();
       }
     },
+
     onInput(key) {
       const userInput = key == 11 ? 0 : key;
 
@@ -141,6 +145,7 @@ export default {
       }
       this.userAnswer = (this.userAnswer + userInput).slice(0, this.maxLength);
     },
+
     onSubmit() {
       if (
         this.userAnswer ==
@@ -161,6 +166,7 @@ export default {
         this.userAnswer = null;
       }
     },
+
     onReset() {
       this.userAnswer = null;
     }
@@ -174,9 +180,12 @@ export default {
   font-size: 10px;
   visibility: hidden;
 }
+
 .game {
   font-size: 56px;
+  max-width: 700px;
 }
+
 .game-board {
   height: 200px;
   display: flex;
