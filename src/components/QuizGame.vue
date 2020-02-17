@@ -13,12 +13,17 @@
             {{ question.second_operand }}
           </div>
         </div>
-        <div class="answer">{{ number }}</div>
+        <div class="answer">
+          <div v-if="question.correct === null" class="computed-answer">
+            {{ computedAnswer }}
+          </div>
+          <div class="user-answer">{{ userAnswer ? userAnswer : "?" }}</div>
+        </div>
         <div class="level">Level: {{ level }} Points: {{ points }}</div>
       </div>
     </div>
     <div>
-      <div class="debug" v-for="q in unfinishedQuestions" v-bind:key="q">
+      <div v-for="(q, i) in unfinishedQuestions" :key="i" class="debug">
         {{ q }}
       </div>
       <div class="debug">Question Number: {{ questionNumber }}</div>
@@ -34,11 +39,12 @@
 
 <script>
 import keypad from "@/components/KeyPad.vue";
+import { Howl } from "howler";
 
 function generate_questions(level) {
   let questions = [];
   for (let i = 1; i <= level; i++) {
-    for (let j = 1; j <= level; j++) {
+    for (let j = i; j <= level; j++) {
       questions.push({ first_operand: i, second_operand: j, correct: false });
     }
   }
@@ -51,14 +57,20 @@ export default {
     keypad
   },
   data: () => ({
-    number: "?",
-    maxLength: 6,
-    showKeypad: true,
+    userAnswer: null,
+
     level: 1,
     points: 0,
-    operator: "+",
+
     questionNumber: null,
-    questions: []
+    questions: [],
+
+    operator: "+",
+    showKeypad: true,
+    maxLength: 6,
+
+    correctSound: new Howl({ src: ["correct.mp3"] }),
+    incorrectSound: new Howl({ src: ["incorrect.mp3"] })
   }),
 
   computed: {
@@ -70,6 +82,25 @@ export default {
     },
     unfinishedQuestions: function() {
       return this.questions.filter(question => !question.correct);
+    },
+    computedAnswer: function() {
+      return this.question.first_operand + this.question.second_operand;
+    }
+  },
+
+  watch: {
+    points: function() {
+      if (this.points >= 0) return;
+
+      this.points = 0;
+      this.level--;
+    },
+
+    level: function() {
+      if (this.level >= 1) return;
+
+      this.level = 1;
+      this.levelUp(); // Or down, as would be the case.
     }
   },
 
@@ -83,7 +114,7 @@ export default {
       this.nextQuestion();
     },
     nextQuestion() {
-      this.number = "?";
+      this.userAnswer = null;
       const doneLevel = this.questions.every(
         question => question.correct == true
       );
@@ -97,36 +128,35 @@ export default {
       }
     },
     onInput(key) {
-      const number = key == 11 ? 0 : key;
-      if (this.number == "?") {
-        this.number = "";
+      const userInput = key == 11 ? 0 : key;
+
+      if (!this.userAnswer) {
+        this.userAnswer = "";
       }
-      this.number = (this.number + number).slice(0, this.maxLength);
+      this.userAnswer = (this.userAnswer + userInput).slice(0, this.maxLength);
     },
     onSubmit() {
       if (
-        this.number ==
+        this.userAnswer ==
         this.question.first_operand + this.question.second_operand
       ) {
-        this.question.correct = true;
+        this.correctSound.play();
+
         this.points++;
+
+        this.question.correct = true;
+        this.nextQuestion();
       } else {
+        this.incorrectSound.play();
+
         this.points--;
-        console.log("wrong");
-        if (this.points < 0) {
-          console.log("level down");
-          this.points = 0;
-          this.level--;
-          if (this.level < 1) {
-            this.level = 1;
-          }
-          this.levelUp();
-        }
+
+        this.question.correct = null;
+        this.userAnswer = null;
       }
-      this.nextQuestion();
     },
     onReset() {
-      this.number = "?";
+      this.userAnswer = null;
     }
   }
 };
@@ -149,13 +179,29 @@ export default {
 }
 
 .question {
+  width: 2em;
   display: grid;
   grid-gap: 10px;
   grid-template-columns: repeat(3, auto);
 }
 
 .answer {
+  text-align: center;
+}
+
+.user-answer,
+.computed-answer {
+  display: inline-block;
+  width: 50%;
+}
+
+.user-answer {
   color: cornflowerblue;
+}
+
+.computed-answer {
+  color: coral;
+  opacity: 0.3;
 }
 
 .level {
@@ -166,8 +212,8 @@ export default {
 .question,
 .answer,
 .level {
+  width: 50%;
   text-align: center;
-  width: 90%;
   margin: 10px auto 0 auto;
 }
 </style>
