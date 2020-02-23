@@ -118,8 +118,13 @@ export default {
   border: none;
 }
 
-button.keypad:focus {
-  outline: 0;
+button.keypad:focus,
+button.keypad:active {
+  outline: none;
+}
+
+button.keypad::-moz-focus-inner {
+  border: 0;
 }
 
 button.keypad:active {
