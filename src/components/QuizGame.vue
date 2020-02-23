@@ -27,6 +27,9 @@
         {{ q }}
       </div>
       <div class="debug">Question Number: {{ questionNumber }}</div>
+      <div v-for="(q, i) in incorrectQuestions" :key="i" class="debug">
+        {{ q }}
+      </div>
     </div>
     <keypad
       :on-input="onInput"
@@ -70,6 +73,7 @@ export default {
 
     questionNumber: null,
     questions: [],
+    incorrectQuestions: [],
 
     operator: "+",
     showKeypad: true,
@@ -124,10 +128,18 @@ export default {
 
     nextQuestion() {
       this.userAnswer = null;
-      const doneLevel = this.questions.every(
-        question => question.correct == true
-      );
-      if (!doneLevel) {
+
+      let doneNew = this.questions.every(question => question.correct == true);
+
+      const doneReDo = this.incorrectQuestions.length == 0;
+
+      if (doneNew && !doneReDo) {
+        this.questions = this.incorrectQuestions;
+        this.incorrectQuestions = [];
+        doneNew = false;
+      }
+
+      if (!doneNew) {
         this.questionNumber = Math.floor(
           Math.random() * this.unfinishedQuestions.length
         );
@@ -147,6 +159,8 @@ export default {
     },
 
     onSubmit() {
+      if (!this.userAnswer) return;
+
       if (
         this.userAnswer ==
         this.question.firstOperand + this.question.secondOperand
@@ -164,6 +178,14 @@ export default {
 
         this.question.correct = null;
         this.userAnswer = null;
+
+        if (this.level != 1) {
+          this.incorrectQuestions.push({
+            firstOperand: this.question.firstOperand,
+            secondOperand: this.question.secondOperand,
+            correct: false
+          });
+        }
       }
     },
 
@@ -178,7 +200,7 @@ export default {
 <style scoped>
 .debug {
   font-size: 10px;
-  visibility: hidden;
+  /* visibility: hidden;*/
 }
 
 .game {
