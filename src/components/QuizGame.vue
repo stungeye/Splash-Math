@@ -23,10 +23,13 @@
       </div>
     </div>
     <div>
+      <div class="debug">
+        High Score Level: {{ highScoreLevel }} High Score Time:
+        {{ highScoreTime }} Start Time: {{ startTime }}
+      </div>
       <div v-for="(q, i) in unfinishedQuestions" :key="i" class="debug">
         {{ q }}
       </div>
-      <div class="debug">Question Number: {{ questionNumber }}</div>
       <div v-for="(q, i) in incorrectQuestions" :key="i" class="debug">
         {{ q }}
       </div>
@@ -73,7 +76,12 @@ export default {
 
     questionNumber: null,
     questions: [],
+    numberOfQuestions: null,
     incorrectQuestions: [],
+
+    startTime: null,
+    highScoreLevel: 1,
+    highScoreTime: null,
 
     operator: "+",
     showKeypad: true,
@@ -102,17 +110,26 @@ export default {
 
   watch: {
     points: function() {
-      if (this.points >= 0) return;
+      if (this.points < 0) {
+        this.points = 0;
+        this.level--;
+        return;
+      }
 
-      this.points = 0;
-      this.level--;
+      if (
+        this.incorrectQuestions.length >
+        Math.log2(this.numberOfQuestions) + 1
+      ) {
+        this.level--;
+      }
     },
 
     level: function() {
-      if (this.level >= 1) return;
+      if (this.level < 1) {
+        this.level = 1;
+      }
 
-      this.level = 1;
-      this.levelUp(); // Or down, as would be the case.
+      this.levelUp(); // Or down, depending.
     }
   },
 
@@ -122,7 +139,13 @@ export default {
 
   methods: {
     levelUp() {
+      if (this.level > this.highScoreLevel) {
+        this.highScoreLevel = this.level;
+        this.highScoreTime = Date.now() - this.startTime;
+      }
       this.questions = generateQuestions(this.level);
+      this.numberOfQuestions = this.questions.length;
+      this.incorrectQuestions = [];
       this.nextQuestion();
     },
 
@@ -145,7 +168,6 @@ export default {
         );
       } else {
         this.level++;
-        this.levelUp();
       }
     },
 
@@ -160,6 +182,10 @@ export default {
 
     onSubmit() {
       if (!this.userAnswer) return;
+
+      if (this.level === 1 && this.points === 0) {
+        this.startTime = Date.now();
+      }
 
       if (
         this.userAnswer ==
