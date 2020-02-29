@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import QuizGame from "../components/QuizGame";
+import QuizGame from "@/components/QuizGame";
 
 export default {
   name: "App",
