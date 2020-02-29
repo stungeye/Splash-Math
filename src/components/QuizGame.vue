@@ -278,6 +278,6 @@ export default {
 .level {
   width: 50%;
   text-align: center;
-  margin: 10px auto 0 auto;
+  margin: 0.5rem auto 0 auto;
 }
 </style>
