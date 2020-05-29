@@ -76,7 +76,6 @@ export default {
 
     questionNumber: null,
     questions: [],
-    numberOfQuestions: null,
     incorrectQuestions: [],
 
     startTime: null,
@@ -96,6 +95,7 @@ export default {
       if (this.questionNumber != null) {
         return this.unfinishedQuestions[this.questionNumber];
       }
+
       return { firstOperand: 0, secondOperand: 0, correct: false };
     },
 
@@ -110,15 +110,17 @@ export default {
 
   watch: {
     points: function() {
+      // Drop a level if we drop below 0 points.
       if (this.points < 0) {
         this.points = 0;
         this.level--;
         return;
       }
 
+      // Drop a level if we the number we've gotten quite a few wrong compared with the total number for this level.
       if (
         this.incorrectQuestions.length >
-        Math.log2(this.numberOfQuestions) + 1
+        Math.log2(this.questions.length) + 1
       ) {
         this.level--;
       }
@@ -139,12 +141,14 @@ export default {
 
   methods: {
     levelUp() {
+      // We user is going up a level grab the timestamp to use for high school calculation later.
       if (this.level > this.highScoreLevel) {
         this.highScoreLevel = this.level;
         this.highScoreTime = Date.now() - this.startTime;
       }
+
+      // Generate the next set of questions.
       this.questions = generateQuestions(this.level);
-      this.numberOfQuestions = this.questions.length;
       this.incorrectQuestions = [];
       this.nextQuestion();
     },
@@ -152,41 +156,50 @@ export default {
     nextQuestion() {
       this.userAnswer = null;
 
+      // Are we done all questions for this level?
       let doneNew = this.questions.every(question => question.correct == true);
-
+      // Did we get any question wrong this level that need to be redone?
       const doneReDo = this.incorrectQuestions.length == 0;
 
+      // If we're done level we might have to redo the ones we got wrong.
       if (doneNew && !doneReDo) {
         this.questions = this.incorrectQuestions;
         this.incorrectQuestions = [];
         doneNew = false;
       }
 
+      // If we're not done, pick a new question by assigning a new question number.
       if (!doneNew) {
         this.questionNumber = Math.floor(
           Math.random() * this.unfinishedQuestions.length
         );
       } else {
+        // Level up if we're done all the questions.
         this.level++;
       }
     },
 
     onInput(key) {
+      // Fix for zero being the 11th input button.
       const userInput = key == 11 ? 0 : key;
 
       if (!this.userAnswer) {
         this.userAnswer = "";
       }
+
       this.userAnswer = (this.userAnswer + userInput).slice(0, this.maxLength);
     },
 
     onSubmit() {
+      // Don't allow blank answers.
       if (!this.userAnswer) return;
 
+      // Start the highscore timer if this is the first submitted answer.
       if (this.level === 1 && this.points === 0) {
         this.startTime = Date.now();
       }
 
+      // Correct?
       if (
         this.userAnswer ==
         this.question.firstOperand + this.question.secondOperand
@@ -198,6 +211,7 @@ export default {
         this.question.correct = true;
         this.nextQuestion();
       } else {
+        // Incorrect?
         this.incorrectSound.play();
 
         this.points--;
@@ -205,6 +219,7 @@ export default {
         this.question.correct = null;
         this.userAnswer = null;
 
+        // Incorrect questions get stored to be asked at the end of the level.
         if (this.level != 1) {
           this.incorrectQuestions.push({
             firstOperand: this.question.firstOperand,
